@@ -589,6 +589,7 @@ module ActionController #:nodoc:
       #   # Renders an empty response with status code 401 (access denied)
       #   render :nothing => true, :status => 401
       def render(options = nil, deprecated_status = nil) #:doc:
+        # performed? はおそらく1回描画したかどうかを判定できる
         raise DoubleRenderError, "Can only render or redirect once per action" if performed?
 
         # Backwards compatibility
@@ -846,6 +847,8 @@ module ActionController #:nodoc:
       end
 
       def initialize_current_url
+        # 2016-12-21 start
+        # 単にインスタンス変数にアサインしているだけ
         @url = UrlRewriter.new(@request, @params.clone())
       end
 
@@ -885,10 +888,12 @@ module ActionController #:nodoc:
         end
       end
 
+      # @assigns に全部のインスタンス変数をまとめていれちゃう
       def add_instance_variables_to_assigns
         @@protected_variables_cache ||= protected_instance_variables.inject({}) { |h, k| h[k] = true; h }
         instance_variables.each do |var|
           next if @@protected_variables_cache.include?(var)
+          # インスタンス変数の最初の '@' を飛ばすために[1..-1]を取っている
           @assigns[var[1..-1]] = instance_variable_get(var)
         end
       end
@@ -931,6 +936,7 @@ module ActionController #:nodoc:
 
       def assert_existance_of_template_file(template_name)
         unless template_exists?(template_name) || ignore_missing_templates
+          # 「このテンプレートはありません」のエラーメッセージを準備して raise する
           full_template_path = @template.send(:full_template_path, template_name, 'rhtml')
           template_type = (template_name =~ /layouts/i) ? 'layout' : 'template'
           raise(MissingTemplate, "Missing #{template_type} #{full_template_path}")

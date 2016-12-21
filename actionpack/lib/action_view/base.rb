@@ -283,6 +283,7 @@ module ActionView #:nodoc:
     end
 
     def delegate_template_exists?(template_path)#:nodoc:
+      # template_exists? はL312あたり
       @@template_handlers.find { |k,| template_exists?(template_path, k) }
     end
 
@@ -398,6 +399,7 @@ module ActionView #:nodoc:
           method_name_file_part = i ? file_path[i+l+1,file_path.length-l-1] : file_path.clone
           method_name_file_part.sub!(/\.r(ht|x)ml$/,'')
           method_name_file_part.tr!('/:-', '_')
+          # これなにしてるんだろう...
           method_name_file_part.gsub!(/[^a-zA-Z0-9_]/){|s| s[0].to_s}
 
           method_name += method_name_file_part
